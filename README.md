@@ -670,6 +670,66 @@ You can extend an existing category or create an entirely new one.
 3. Add a matching **opt-in file** using the naming convention `<name>.opt-in.md` (e.g., `compliance.opt-in.md`). See `security-baseline.opt-in.md` for the expected format. Omitting this file means the extension is always enforced with no user opt-out.
 4. Rules are blocking by default — if verification criteria are not met, the stage cannot proceed until the finding is resolved.
 
+### Organizational Complexity
+
+For organizations managing AI-DLC across multiple teams, we recommend a two-layer extension strategy that keeps customizations additive without modifying any shipped AI-DLC files.
+
+#### Layer 1: Org-Wide Extensions
+
+Create new extension categories that apply across all teams. These live in a shared central repo that every project inherits.
+
+```text
+extensions/
+├── security/                  # shipped with AI-DLC (don't touch)
+├── testing/                   # shipped with AI-DLC (don't touch)
+│
+├── org-compliance/            # YOUR org-wide extension
+│   └── baseline/
+│       ├── org-compliance.md          # rules (IDs: ORG-01, ORG-02)
+│       └── org-compliance.opt-in.md   # opt-in prompt
+│
+└── org-observability/         # always enforced (no opt-in file)
+    └── baseline/
+        └── observability.md
+```
+
+#### Layer 2: Team-Specific Extensions
+
+Individual teams add their own extensions in additional subdirectories, stacking on top of org-wide ones.
+
+```text
+extensions/
+├── org-compliance/            # from org central repo
+├── org-observability/         # from org central repo
+│
+├── team-api-standards/        # TEAM-SPECIFIC
+│   └── baseline/
+│       ├── api-standards.md           # IDs: TEAMAPI-01, TEAMAPI-02
+│       └── api-standards.opt-in.md
+│
+└── team-data-governance/      # TEAM-SPECIFIC, always enforced
+    └── baseline/
+        └── data-governance.md
+```
+
+#### Distribution Approach
+
+For managing the two layers in practice:
+
+- **Org template repo**: Contains the AI-DLC core files plus your `org-*` extensions. Teams consume this via `git subtree`.
+- **Team repos**: Add `team-*` extension directories on top. Since everything is additive under `extensions/`, there are no merge conflicts.
+- **Updating AI-DLC**: When a new release drops, update only the AWS-owned directories. Your `org-*` and `team-*` directories are untouched.
+
+The separation is entirely directory-based. AWS owns their directories, your org owns `org-*` directories, and teams own `team-*` directories. Updates flow downstream cleanly because nothing overlaps.
+
+| Event                      | What Happens                                                                                       |
+| -------------------------- | -------------------------------------------------------------------------------------------------- |
+| AWS releases new version   | Central team overwrites `aws-*` directories, commits, pushes. Org extensions untouched.            |
+| Org rules change           | Central team edits `org-*` directories, commits, pushes.                                           |
+| Team pulls updates         | `git subtree pull` + re-run install script. Team extensions layer on top with zero conflicts.      |
+| Team adds own rules        | Add to `team-extensions/` in their own repo. Completely isolated.                                  |
+| New team onboards          | `git subtree add` + run install. Immediately inherits all org extensions.                          |
+
 ---
 
 ## Tenets
