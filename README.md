@@ -678,7 +678,7 @@ When multiple teams share a single AI-DLC installation, extension management ben
 
 These are extensions that apply across the entire organization (e.g., security baselines, compliance rules). They live alongside the AWS-shipped extensions under `extensions/`:
 
-```
+```text
 aws-aidlc-rule-details/
 └── extensions/
     ├── security/              # AWS-shipped extension
@@ -693,7 +693,7 @@ Org-wide extensions follow the same format as any other extension — markdown f
 
 Individual teams can layer their own rules without modifying org-wide or AWS-shipped files. Create separate directories under `extensions/` with a team prefix:
 
-```
+```text
 aws-aidlc-rule-details/
 └── extensions/
     ├── security/              # AWS-shipped
@@ -710,12 +710,12 @@ Git subtree is the recommended mechanism for distributing AI-DLC rules across re
 
 The following table summarizes the lifecycle events and who is responsible:
 
-| Event | Who | Action |
-|-------|-----|--------|
-| AWS ships a new release | Central team | Pull latest via `git subtree pull` from the upstream AI-DLC repo; AWS-shipped directories (`security/`, etc.) are overwritten — org and team directories are unaffected |
-| Org rules change | Central team | Commit changes to `org-*` directories and push to the org's internal AI-DLC fork or overlay repo |
-| New team onboards | Team + Central | Team creates a `team-<name>/` directory under `extensions/`; central team adds the repo as a subtree source if distributing centrally |
-| Team adds own rules | Owning team | Commit to their `team-<name>/` directory; changes stay scoped to that team |
+| Event                      | What Happens                                                                                                                     |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| AWS ships a new release    | Central team pulls latest via `git subtree pull`. AWS-shipped dirs (`security/`, etc.) overwritten; org/team dirs unaffected.    |
+| Org rules change           | Central team commits changes to `org-*` directories and pushes to the org's internal AI-DLC fork or overlay repo.                |
+| New team onboards          | Team creates a `team-<name>/` dir under `extensions/`; central team adds repo as a subtree source if distributing centrally.     |
+| Team adds own rules        | Owning team commits to their `team-<name>/` directory. Changes stay scoped to that team.                                         |
 
 > **Note:** The "install script" referenced in some AI-DLC distribution guides is an optional convenience wrapper around `git subtree add` / `git subtree pull` that your organization can provide. If your org doesn't ship one, the raw git subtree commands work directly. See the [Git subtree documentation](https://git-scm.com/book/en/v2/Git-Tools-Advanced-Merging#_subtree_merge) for details.
 
