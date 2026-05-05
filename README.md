@@ -706,7 +706,7 @@ Each `team-*` directory is owned by its respective team. This naming convention 
 
 #### Distribution Approach
 
-Git subtree is the recommended mechanism for distributing AI-DLC rules across repositories. It embeds the rule files directly in each consuming repo (no special tooling required at clone time), avoids the detached-HEAD pitfalls of submodules, and keeps the full file history available locally — making it a pragmatic choice for teams that want simple, self-contained repositories.
+For individual developers, downloading a release zip is sufficient. For organizations managing extensions across multiple teams, git subtree offers tighter integration. It embeds the rule files directly in each consuming repo (no special tooling required at clone time), avoids the detached-HEAD pitfalls of submodules, and keeps the full file history available locally — making it a pragmatic choice for teams that want simple, self-contained repositories.
 
 The following table summarizes the lifecycle events and who is responsible:
 
@@ -717,7 +717,7 @@ The following table summarizes the lifecycle events and who is responsible:
 | New team onboards          | Team creates a `team-<name>/` dir under `extensions/`; central team adds repo as a subtree source if distributing centrally.     |
 | Team adds own rules        | Owning team commits to their `team-<name>/` directory. Changes stay scoped to that team.                                         |
 
-> **Note:** The "install script" referenced in some AI-DLC distribution guides is an optional convenience wrapper around `git subtree add` / `git subtree pull` that your organization can provide. If your org doesn't ship one, the raw git subtree commands work directly. See the [Git subtree documentation](https://git-scm.com/book/en/v2/Git-Tools-Advanced-Merging#_subtree_merge) for details.
+> **Note:** Some organizations may choose to wrap `git subtree add` / `git subtree pull` in a convenience script. If your org doesn't ship one, the raw git subtree commands work directly. See the [git-subtree documentation](https://manpages.debian.org/testing/git-man/git-subtree.1.en.html) for details.
 
 ---
 
