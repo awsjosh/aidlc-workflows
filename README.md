@@ -730,6 +730,55 @@ The separation is entirely directory-based. AWS owns their directories, your org
 | Team adds own rules        | Add to `team-extensions/` in their own repo. Completely isolated.                                  |
 | New team onboards          | `git subtree add` + run install. Immediately inherits all org extensions.                          |
 
+### Organizational Complexity
+
+When multiple teams share a single AI-DLC installation, extension management benefits from a layered approach that separates org-wide concerns from team-specific ones.
+
+#### Layer 1 — Org-Wide Extensions
+
+These are extensions that apply across the entire organization (e.g., security baselines, compliance rules). They live alongside the AWS-shipped extensions under `extensions/`:
+
+```
+aws-aidlc-rule-details/
+└── extensions/
+    ├── security/              # AWS-shipped extension
+    └── org-compliance/        # Org-wide extension (your addition)
+        ├── hipaa/
+        └── soc2/
+```
+
+Org-wide extensions follow the same format as any other extension — markdown files with rule IDs, applicability questions, and verification sections.
+
+#### Layer 2 — Team-Specific Extensions
+
+Individual teams can layer their own rules without modifying org-wide or AWS-shipped files. Create separate directories under `extensions/` with a team prefix:
+
+```
+aws-aidlc-rule-details/
+└── extensions/
+    ├── security/              # AWS-shipped
+    ├── org-compliance/        # Org-wide (Layer 1)
+    ├── team-api-standards/    # Team-specific (Layer 2)
+    └── team-data-governance/  # Team-specific (Layer 2)
+```
+
+Each `team-*` directory is owned by its respective team. This naming convention makes ownership clear and avoids merge conflicts between teams.
+
+#### Distribution Approach
+
+Git subtree is the recommended mechanism for distributing AI-DLC rules across repositories. It embeds the rule files directly in each consuming repo (no special tooling required at clone time), avoids the detached-HEAD pitfalls of submodules, and keeps the full file history available locally — making it a pragmatic choice for teams that want simple, self-contained repositories.
+
+The following table summarizes the lifecycle events and who is responsible:
+
+| Event | Who | Action |
+|-------|-----|--------|
+| AWS ships a new release | Central team | Pull latest via `git subtree pull` from the upstream AI-DLC repo; AWS-shipped directories (`security/`, etc.) are overwritten — org and team directories are unaffected |
+| Org rules change | Central team | Commit changes to `org-*` directories and push to the org's internal AI-DLC fork or overlay repo |
+| New team onboards | Team + Central | Team creates a `team-<name>/` directory under `extensions/`; central team adds the repo as a subtree source if distributing centrally |
+| Team adds own rules | Owning team | Commit to their `team-<name>/` directory; changes stay scoped to that team |
+
+> **Note:** The "install script" referenced in some AI-DLC distribution guides is an optional convenience wrapper around `git subtree add` / `git subtree pull` that your organization can provide. If your org doesn't ship one, the raw git subtree commands work directly. See the [Git subtree documentation](https://git-scm.com/book/en/v2/Git-Tools-Advanced-Merging#_subtree_merge) for details.
+
 ---
 
 ## Tenets
